@@ -26,8 +26,11 @@ LOG_DIR="$BASE_DIR/logs"
 # JVM options
 JAVA_OPTS="-Xmx512M -XX:MaxDirectMemorySize=256M"
 
-# Check if JAVA_HOME is set
-if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+# Check for bundled JRE first, then JAVA_HOME, then system PATH
+BUNDLED_JAVA="$BASE_DIR/jre/bin/java"
+if [ -x "$BUNDLED_JAVA" ]; then
+    JAVA="$BUNDLED_JAVA"
+elif [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"
 else
     JAVA="java"

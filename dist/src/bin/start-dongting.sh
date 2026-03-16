@@ -25,8 +25,11 @@ LOG_DIR="$BASE_DIR/logs"
 DATA_DIR="$BASE_DIR/data"
 PID_FILE="$DATA_DIR/dongting.pid"
 
-# Check if JAVA_HOME is set
-if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+# Check for bundled JRE first, then JAVA_HOME, then system PATH
+BUNDLED_JAVA="$BASE_DIR/jre/bin/java"
+if [ -x "$BUNDLED_JAVA" ]; then
+    JAVA="$BUNDLED_JAVA"
+elif [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"
 else
     JAVA="java"

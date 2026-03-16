@@ -24,8 +24,11 @@ $LOG_DIR = Join-Path $BASE_DIR "logs"
 $DATA_DIR = Join-Path $BASE_DIR "data"
 $PidFile = Join-Path $DATA_DIR "dongting.pid"
 
-# Check if JAVA_HOME is set
-if ($env:JAVA_HOME -and (Test-Path (Join-Path $env:JAVA_HOME "bin\java.exe"))) {
+# Check for bundled JRE first, then JAVA_HOME, then system PATH
+$BundledJava = Join-Path $BASE_DIR "jre\bin\java.exe"
+if (Test-Path $BundledJava) {
+    $Java = $BundledJava
+} elseif ($env:JAVA_HOME -and (Test-Path (Join-Path $env:JAVA_HOME "bin\java.exe"))) {
     $Java = Join-Path $env:JAVA_HOME "bin\java.exe"
 } else {
     $Java = "java"
