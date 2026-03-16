@@ -125,14 +125,8 @@ if ($drive) {
 
 # Check if JRE directory already exists
 if (Test-Path $JRE_DIR) {
-    Write-Host "Warning: JRE directory already exists at $JRE_DIR" -ForegroundColor Yellow
-    $response = Read-Host "This will overwrite the existing JRE. Continue? (y/n)"
-    if ($response -ne "y" -and $response -ne "Y") {
-        Write-Host "Aborted."
-        exit 0
-    }
-    Write-Host "Removing existing JRE directory..."
-    Remove-Item -Path $JRE_DIR -Recurse -Force
+    Write-Error "Error: JRE directory already exists at $JRE_DIR. Please remove it first."
+    exit 1
 }
 
 # Analyze module dependencies with jdeps

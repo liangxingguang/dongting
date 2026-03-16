@@ -57,15 +57,8 @@ check_disk_space() {
 
 # Check if JRE directory already exists
 if [ -d "$JRE_DIR" ]; then
-    echo "Warning: JRE directory already exists at $JRE_DIR" >&2
-    echo "This will overwrite the existing JRE. Continue? (y/n)" >&2
-    read -r response
-    if [ "$response" != "y" ] && [ "$response" != "Y" ]; then
-        echo "Aborted."
-        exit 1
-    fi
-    echo "Removing existing JRE directory..."
-    rm -rf "$JRE_DIR"
+    echo "Error: JRE directory already exists at $JRE_DIR. Please remove it first." >&2
+    exit 1
 fi
 
 # Find jdeps and jlink
