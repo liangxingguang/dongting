@@ -94,6 +94,21 @@ if ! command -v "$JLINK" &> /dev/null; then
     exit 1
 fi
 
+# Detect jlink version for compress option compatibility
+JLINK_VERSION=$($JLINK --version 2>&1 | head -1 | sed -E 's/^([0-9]+).*/\1/')
+if [ -z "$JLINK_VERSION" ] || ! [ "$JLINK_VERSION" -gt 0 ] 2>/dev/null; then
+    echo "Failed to detect jlink version" >&2
+    exit 1
+fi
+
+# Java 21+ uses --compress=zip-N, Java 11-20 uses --compress=N
+if [ "$JLINK_VERSION" -ge 21 ] 2>/dev/null; then
+    COMPRESS_OPT="--compress=zip-6"
+else
+    COMPRESS_OPT="--compress=2"
+fi
+echo "Detected jlink version: $JLINK_VERSION, using $COMPRESS_OPT"
+
 # Check disk space before proceeding
 check_disk_space
 
@@ -115,7 +130,7 @@ echo "Required modules: $MODULES"
 
 # Create jlink image
 echo "Creating trimmed JRE at $JRE_DIR..."
-$JLINK --compress=2 --strip-debug --no-header-files --no-man-pages --add-modules "$MODULES" --output "$JRE_DIR"
+$JLINK $COMPRESS_OPT --strip-debug --no-header-files --no-man-pages --add-modules "$MODULES" --output "$JRE_DIR"
 
 if [ $? -eq 0 ]; then
     echo "Successfully created trimmed JRE at $JRE_DIR"

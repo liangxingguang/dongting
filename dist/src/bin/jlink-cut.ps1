@@ -83,6 +83,28 @@ try {
     exit 1
 }
 
+# Detect jlink version for compress option compatibility
+try {
+    $JlinkVersionOutput = & $JLINK --version 2>&1 | Select-Object -First 1
+    if ($JlinkVersionOutput -match '(\d+)') {
+        $JlinkVersion = [int]$Matches[1]
+    } else {
+        Write-Error "Failed to detect jlink version"
+        exit 1
+    }
+} catch {
+    Write-Error "Failed to detect jlink version: $_"
+    exit 1
+}
+
+# Java 21+ uses --compress=zip-N, Java 11-20 uses --compress=N
+if ($JlinkVersion -ge 21) {
+    $CompressOpt = "--compress=zip-6"
+} else {
+    $CompressOpt = "--compress=2"
+}
+Write-Host "Detected jlink version: $JlinkVersion, using $CompressOpt"
+
 # Check available disk space (require at least 100MB free)
 $drive = Split-Path -Qualifier $BASE_DIR
 if ($drive) {
@@ -117,21 +139,23 @@ if (Test-Path $JRE_DIR) {
 Write-Host "Analyzing JDK module dependencies..."
 Write-Host "This may take a while..."
 
-# Build the JAR file list
-$JarList = ($JarFiles | ForEach-Object { $_.FullName }) -join " "
+# Build the JAR file arguments array
+$JarArgs = $JarFiles | ForEach-Object { $_.FullName }
 
 # Run jdeps and capture output
-$jdepsOutput = & $JDEPS --multi-release 11 --module-path $LIB_DIR --ignore-missing-deps --print-module-deps $JarList 2>&1
+$jdepsOutput = & $JDEPS --multi-release 11 --module-path $LIB_DIR --ignore-missing-deps --print-module-deps @JarArgs 2>&1
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Error: Failed to analyze module dependencies"
-    Write-Error $jdepsOutput
+    $jdepsOutput | ForEach-Object { Write-Error $_ }
     exit 1
 }
 
 # Parse the modules from jdeps output
 # --print-module-deps outputs only the JDK modules required by the application
-$Modules = ($jdepsOutput -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) -join ","
+# Filter out warning lines, keep only the last line which contains the module list
+$ModuleLine = $jdepsOutput | Where-Object { $_ -notmatch '^Warning:' } | Select-Object -Last 1
+$Modules = ($ModuleLine -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }) -join ","
 
 if ([string]::IsNullOrEmpty($Modules)) {
     Write-Error "Error: Failed to determine module dependencies"
@@ -142,7 +166,7 @@ Write-Host "Required modules: $Modules"
 
 # Create jlink image
 Write-Host "Creating trimmed JRE at $JRE_DIR..."
-& $JLINK --compress=2 --strip-debug --no-header-files --no-man-pages --add-modules $Modules --output $JRE_DIR
+& $JLINK $CompressOpt --strip-debug --no-header-files --no-man-pages --add-modules $Modules --output $JRE_DIR
 
 if ($LASTEXITCODE -eq 0) {
     $jreSize = (Get-ChildItem -Path $JRE_DIR -Recurse | Measure-Object -Property Length -Sum).Sum
