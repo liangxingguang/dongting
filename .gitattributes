@@ -4,8 +4,8 @@
 # Shell scripts must use LF line endings (Unix style)
 *.sh text eol=lf
 
-# Batch files should use CRLF line endings (Windows style)
-*.bat text eol=crlf
+# change to CRLF in assembly.xml
+*.bat text
 
 # PowerShell scripts can use either, but LF is safer for cross-platform
 *.ps1 text eol=lf

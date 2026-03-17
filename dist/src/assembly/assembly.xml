@@ -23,10 +23,23 @@
     <includeBaseDirectory>false</includeBaseDirectory>
 
     <fileSets>
-        <!-- copy bin scripts -->
+        <!-- copy bat scripts with CRLF line endings -->
         <fileSet>
             <directory>${project.basedir}/src/bin</directory>
             <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>crlf</lineEnding>
+        </fileSet>
+        <!-- copy other bin scripts (shell scripts) -->
+        <fileSet>
+            <directory>${project.basedir}/src/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <excludes>
+                <exclude>*.bat</exclude>
+            </excludes>
             <fileMode>0755</fileMode>
         </fileSet>
         <!-- copy conf files -->
