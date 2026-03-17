@@ -22,6 +22,7 @@
 - [Advanced](#advanced)
   - [Import project to IDE](#import-project-to-ide)
   - [Build raft server through code](#build-raft-server-through-code)
+  - [Trim JRE with JLink](#trim-jre-with-jlink)
 - [About me](#about-me)
 
 # Introduce
@@ -495,6 +496,10 @@ set a key with a TTL, after the TTL expires, the key will be deleted automatical
 The [lock](demos/src/main/java/com/github/dtprj/dongting/demos/advanced/lock) directory contains examples of using distributed 
 locks. Distributed locks can be manually operated with tryLock/unlock, or can be fully automated with 
 tryLock/updateLease (which can be used for leader election in business code).
+
+## Trim JRE with JLink
+
+Use `jlink` to create a trimmed JRE (approximately 30-45 MB). See [jlink-cut guide](docs/jlink-cut.md).
 
 # About me
 
