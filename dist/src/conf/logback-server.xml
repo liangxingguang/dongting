@@ -26,7 +26,7 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE_WRITER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/dongting-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOG_DIR}/dongting-server.%i.log</fileNamePattern>
@@ -41,7 +41,14 @@
         </encoder>
     </appender>
 
-    <appender name="STATS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>32768</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <maxFlushTime>1000</maxFlushTime>
+        <appender-ref ref="FILE_WRITER"/>
+    </appender>
+
+    <appender name="STATS_FILE_WRITER" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/dongting-stats.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOG_DIR}/dongting-stats.%i.log</fileNamePattern>
@@ -54,6 +61,13 @@
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level - %msg%n</pattern>
         </encoder>
+    </appender>
+
+    <appender name="STATS_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <maxFlushTime>1000</maxFlushTime>
+        <appender-ref ref="STATS_FILE_WRITER"/>
     </appender>
 
     <logger name="com.github.dtprj.dongting.perf" level="INFO" additivity="false">
